@@ -59,7 +59,7 @@ This task was straightforward and no significant challenges were encountered.
   - **Fix Required**: Proper input validation is necessary to check for non-integer values or negative numbers before the factorial computation proceeds. Additionally, reviewing how the stack is used in the factorial subroutine might be required to avoid stack-related issues or infinite recursion.
 
 #### Task 4: Simulating Hardware Control in Assembly
-This task has not been attempted yet, and thus no challenges have been encountered.
+There was no error encountered in this task .
 
 ---
 
