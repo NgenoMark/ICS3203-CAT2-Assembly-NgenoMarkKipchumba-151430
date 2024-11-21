@@ -11,33 +11,35 @@ This repository contains assembly programs for four practical tasks as part of C
 - **File:** `task1_control_flow.asm`
 - **Purpose:** Classifies a number as POSITIVE, NEGATIVE, or ZERO using conditional and unconditional jumps.
 - **Instructions:**
-  1. Compile using: `nasm -f elf32 task1_control_flow.asm -o task1_control_flow.o`
-  2. Link using: `ld -m elf_i386 task1_control_flow.o -o task1_control_flow`
-  3. Run using: `./task1_control_flow`
+  1. Compile using: `nasm -f elf32 control_flow.asm -o control_flow.o`
+  2. Link using: `ld -m elf_i386 control_flow.o -o control_flow`
+  3. Run using: `./control_flow`
 
 ### Task 2: Array Manipulation with Looping and Reversal
-- **File:** `task2_array_reversal.asm`
+- **File:** `array_manipulation.asm`
 - **Purpose:** Accepts an array of integers, reverses it in place, and outputs the result.
 - **Instructions:**
-  1. Compile using: `nasm -f elf32 task2_array_reversal.asm -o task2_array_reversal.o`
-  2. Link using: `ld -m elf_i386 task2_array_reversal.o -o task2_array_reversal`
-  3. Run using: `./task2_array_reversal`
+  1. Compile using: `nasm -f elf32 array_manipulation.asm -o array_manipulation.o`
+  2. Link using: `ld -m elf_i386 array_manipulation.o -o array_manipulation`
+  3. Run using: `./array_manipulation`
 
 ### Task 3: Modular Program with Subroutine
-- **File:** `task3_factorial_subroutine.asm`
+- **File:** `factorial_program.asm`
 - **Purpose:** Computes the factorial of a number using a subroutine and stack for register preservation.
 - **Instructions:**
-  1. Compile using: `nasm -f elf32 task3_factorial_subroutine.asm -o task3_factorial_subroutine.o`
-  2. Link using: `ld -m elf_i386 task3_factorial_subroutine.o -o task3_factorial_subroutine`
-  3. Run using: `./task3_factorial_subroutine`
+  1. Compile using: `nasm -f elf32 factorial_program.asm -o factorial_program.o`
+  2. Link using: `ld -m elf_i386 factorial_program.o -o factorial_program`
+  3. Run using: `./factorial_program`
+- **Challenges and Insights**
+  The program failed to genearte the factorials of the number giving nothing or giving a " Floating point exception " error to mean that the number was being divided by 0
 
 ### Task 4: Data Monitoring and Control
-- **File:** `task4_data_monitoring.asm`
+- **File:** `data_monitoring.asm`
 - **Purpose:** Simulates a water level control program with actions based on sensor input.
 - **Instructions:**
-  1. Compile using: `nasm -f elf32 task4_data_monitoring.asm -o task4_data_monitoring.o`
-  2. Link using: `ld -m elf_i386 task4_data_monitoring.o -o task4_data_monitoring`
-  3. Run using: `./task4_data_monitoring`
+  1. Compile using: `nasm -f elf32 data_monitoring.asm -o data_monitoring.o`
+  2. Link using: `ld -m elf_i386 data_monitoring.o -o data_monitoring`
+  3. Run using: `./data_monitoring`
 
 ---
 
