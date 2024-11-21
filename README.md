@@ -41,11 +41,32 @@ This repository contains assembly programs for four practical tasks as part of C
 
 ---
 
-## Challenges and Insights
-- Task 1: Understanding the difference between conditional and unconditional jumps.
-- Task 2: Reversing an array in place without additional memory.
-- Task 3: Managing the stack for modular programming.
-- Task 4: Simulating hardware control in assembly.
+## Challenges and Insights 
+### Challenge Report:
+
+#### Task 1: Understanding the Difference Between Conditional and Unconditional Jumps
+This task was straightforward and no significant challenges were encountered.
+
+#### Task 2: Reversing an Array in Place Without Additional Memory
+- **Challenge Encountered**: 
+  When testing the array manipulation program, it successfully handled a fixed set of five integers, such as `2 5 9 4 6`. However, when provided with other input formats (e.g., less than or more than five integers or invalid characters), the program failed to handle these cases gracefully.
+  - **Error**: No explicit error handling was implemented for these edge cases, leading to potential crashes or unexpected behavior. The input format wasn't strictly validated.
+
+#### Task 3: Managing the Stack for Modular Programming (Factorial Calculation)
+- **Challenge Encountered**: 
+  When running the factorial program with input like `3`, I encountered a "Floating point exception (core dumped)" error.
+  - **Cause of Error**: The error likely occurred due to the improper handling of edge cases, such as negative inputs, or the program attempting an invalid operation (like division by zero or incorrect recursion base case). The program may also fail to handle non-integer inputs properly.
+  - **Fix Required**: Proper input validation is necessary to check for non-integer values or negative numbers before the factorial computation proceeds. Additionally, reviewing how the stack is used in the factorial subroutine might be required to avoid stack-related issues or infinite recursion.
+
+#### Task 4: Simulating Hardware Control in Assembly
+This task has not been attempted yet, and thus no challenges have been encountered.
+
+---
+
+**General Observations**:
+- Both the array manipulation and factorial programs would benefit from improved input validation.
+- The factorial program's error suggests that there may be issues in how the stack is managed, possibly due to improper restoration of registers or incorrect handling of recursive calls.
+
 
 ---
 
