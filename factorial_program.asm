@@ -1,160 +1,123 @@
 section .data
-    prompt_input db "Enter a non-negative integer: ", 0
-    result_msg db "Factorial: ", 0
-    error_msg db "Invalid input! Please enter a valid non-negative integer.", 0
-    input_too_large_msg db "Input too large. Enter a number less than or equal to 12.", 0
-    newline db 0xA, 0
-
+    prompt db 'Give number between 1 and 10: ', 0
+    result_msg db 'The factorial is: ', 0
+    newline db 0x0A, 0  ; Newline character for formatting
+    error_msg db 'Invalid input. Enter a number between 1 and 10.', 0
 
 section .bss
-    user_input resb 10         ; Reserve space for user input (10 bytes to handle larger numbers)
-    factorial_result resd 1    ; Reserve space for factorial result
+    buffer resb 4  ; Buffer to store the input number as a string
+    input_num resb 1  ; Store the converted input number
+    factorial_result resd 1  ; Store the result of the factorial
 
 section .text
     global _start
 
 _start:
-    ; Print input prompt
-    mov eax, 4               ; syscall: write
-    mov ebx, 1               ; file descriptor: stdout
-    mov ecx, prompt_input    ; pointer to message
-    mov edx, 30              ; message length
-    int 0x80
+    ; Print the prompt message
+    mov eax, 4                ; syscall number for sys_write
+    mov ebx, 1                ; file descriptor (1 = stdout)
+    lea ecx, [prompt]         ; load address of prompt
+    mov edx, 29               ; length of the prompt string
+    int 0x80                  ; Make the syscall to write to stdout
 
-    ; Read user input
-    mov eax, 3               ; syscall: read
-    mov ebx, 0               ; file descriptor: stdin
-    mov ecx, user_input      ; buffer to store input
-    mov edx, 10              ; buffer length (max 10 characters for input)
-    int 0x80
+    ; Read the input from the user
+    mov eax, 3                ; syscall number for sys_read
+    mov ebx, 0                ; file descriptor (0 = stdin)
+    lea ecx, [buffer]         ; load address of buffer
+    mov edx, 4                ; number of bytes to read
+    int 0x80                  ; Make the syscall to read from stdin
 
-    ; Convert input to integer (check for valid numeric input)
-    mov esi, user_input      ; pointer to input buffer
-    xor eax, eax             ; clear eax (for storing result)
-    xor ecx, ecx             ; clear ecx (for digit)
-parse_input:
-    movzx ecx, byte [esi]    ; load byte (character)
-    cmp ecx, 0xA             ; check for newline character (Enter key)
-    je validate_input
-    cmp ecx, '0'
-    jl invalid_input         ; if less than '0', invalid character
-    cmp ecx, '9'
-    jg invalid_input         ; if greater than '9', invalid character
-    sub ecx, '0'             ; convert ASCII to integer
-    imul eax, eax, 10        ; shift left by 10 (decimal place)
-    add eax, ecx             ; add digit to result
-    inc esi                  ; move to next character
-    jmp parse_input
+    ; Convert the input string to an integer
+    mov eax, 0                ; Clear eax
+    lea esi, [buffer]         ; Point to the buffer
+    xor ebx, ebx              ; Clear ebx for multiplication
+    mov bl, byte [esi]        ; Move the first byte to bl
+    sub bl, '0'               ; Convert ASCII to integer
+    mov [input_num], bl       ; Store the integer in input_num
 
-validate_input:
-    ; Validate input (non-negative check)
-    cmp eax, 0
-    jl exit_program          ; if negative, exit program
+    ; Validate the input (must be between 1 and 10)
+    cmp byte [input_num], 1
+    jb .invalid_input         ; If less than 1, jump to invalid input
+    cmp byte [input_num], 10
+    ja .invalid_input         ; If greater than 10, jump to invalid input
 
-    ; Check if input is too large (factorial of numbers greater than 12 is too large)
-    cmp eax, 12
-    jg input_too_large       ; exit if input is greater than 12
+    ; Calculate the factorial
+    movzx eax, byte [input_num] ; Move the input number to eax
+    call factorial
+    ; The result (factorial) is now in eax
+    mov [factorial_result], eax ; Store the result in factorial_result
 
-    ; Store input number for factorial calculation
-    push eax                 ; push input onto stack
-    call factorial           ; call the factorial subroutine
-    add esp, 4               ; clean up the stack
+    ; Print the result message
+    mov eax, 4                ; syscall number for sys_write
+    mov ebx, 1                ; file descriptor (1 = stdout)
+    lea ecx, [result_msg]     ; load address of result_msg
+    mov edx, 19               ; length of the result_msg string
+    int 0x80                  ; Make the syscall to write to stdout
 
-    ; Store the result in memory
-    mov [factorial_result], eax
+    ; Convert the result to a string
+    lea edi, [buffer + 3]     ; Point to the end of the buffer
+    mov byte [edi], 0x0A      ; Add a newline character at the end
 
-    ; Print result message
-    mov eax, 4               ; syscall: write
-    mov ebx, 1               ; file descriptor: stdout
-    mov ecx, result_msg      ; pointer to message
-    mov edx, 10              ; message length
-    int 0x80
+    ; Call the conversion logic to convert the number in eax to string
+    mov eax, [factorial_result]
+    call convert
 
-    ; Print factorial result (convert to string)
-    mov eax, [factorial_result] ; load the result in eax
-    call print_integer       ; print the integer
+    ; Write the result to the console
+    mov eax, 4                ; syscall number for sys_write
+    mov ebx, 1                ; file descriptor (1 = stdout)
+    lea ecx, [edi]            ; pointer to the string to be printed
+    lea edx, [buffer + 4]     ; buffer length (4 bytes)
+    sub edx, ecx              ; calculate length by subtracting addresses
+    int 0x80                  ; Make the syscall to write to stdout
 
-    ; Exit program
-    jmp exit_program
+    ; Exit the program
+    mov eax, 1                ; syscall number for sys_exit
+    xor ebx, ebx              ; exit status 0
+    int 0x80                  ; Make the syscall to exit
 
-invalid_input:
-    ; Print error message for invalid input
-    mov eax, 4               ; syscall: write
-    mov ebx, 1               ; file descriptor: stdout
-    mov ecx, error_msg       ; pointer to error message
-    mov edx, 44              ; message length
-    int 0x80
-    jmp exit_program
+.invalid_input:
+    ; Print the error message
+    mov eax, 4                ; syscall number for sys_write
+    mov ebx, 1                ; file descriptor (1 = stdout)
+    lea ecx, [error_msg]      ; load address of error_msg
+    mov edx, 39               ; length of the error_msg string
+    int 0x80                  ; Make the syscall to write to stdout
 
-input_too_large:
-    ; Print message for input too large
-    mov eax, 4               ; syscall: write
-    mov ebx, 1               ; file descriptor: stdout
-    mov ecx, input_too_large_msg   ; pointer to error message
-    mov edx, 47              ; message length
-    int 0x80
-    jmp exit_program
+    ; Exit the program
+    mov eax, 1                ; syscall number for sys_exit
+    xor ebx, ebx              ; exit status 0
+    int 0x80                  ; Make the syscall to exit
 
-
-exit_program:
-    mov eax, 1               ; syscall: exit
-    xor ebx, ebx             ; return code 0
-    int 0x80
-
-; Subroutine: Factorial Calculation
+; Factorial function using recursion
 factorial:
-    ; Get the input number (argument)
-    push ebp                 ; Save base pointer
-    mov ebp, esp             ; Set base pointer to current stack
-    mov eax, [ebp + 8]       ; Get input number (argument)
+    cmp eax, 1                ; Check if eax is 1 (base case)
+    jz end_recursion          ; If eax == 1, jump to the end
 
-    cmp eax, 1               ; Base case: if n <= 1, return 1
-    jle factorial_base_case  ; Jump to base case if n <= 1
+    ; Save the current value of eax
+    push eax
 
-    ; Recursive case: n * factorial(n-1)
-    push eax                 ; Save current n on stack
-    dec eax                  ; Decrement n by 1
-    push eax                 ; Push (n-1) as argument for the next factorial call
-    call factorial           ; Recursive call
-    add esp, 4               ; Clean up the stack after return
+    ; Decrement eax and call factorial recursively
+    dec eax
+    call factorial
 
-    pop ebx                  ; Restore original n from the stack
-    imul eax, ebx            ; Multiply n * factorial(n-1)
-    jmp factorial_end        ; Jump to end of the function
+    ; Multiply the result returned in eax with the saved value of eax
+    pop ebx
+    imul eax, ebx             ; eax = eax * ebx
 
-factorial_base_case:
-    mov eax, 1               ; Return 1 for n <= 1
+    ret
 
-factorial_end:
-    mov esp, ebp             ; Restore stack pointer
-    pop ebp                  ; Restore base pointer
-    ret                      ; Return to caller
+end_recursion:
+    mov eax, 1                ; Return 1 when eax is 1 (base case)
+    ret
 
-
-; Subroutine: Print Integer as String
-print_integer:
-    ; Convert integer in EAX to ASCII and print it
-    ; We use a simple loop to extract digits and print them
-    push eax                 ; save eax
-    mov ecx, 10              ; divisor for mod 10 (get digits)
-    xor ebx, ebx             ; clear ebx (for remainder)
-    mov edx, 0               ; clear edx (quotient)
-    print_digits:
-        div ecx              ; divide eax by 10
-        add dl, '0'          ; convert remainder to ASCII
-        push dx              ; push digit onto stack
-        test eax, eax        ; check if quotient is zero
-        jnz print_digits     ; if not, continue dividing
-
-    ; Print digits in reverse order (from stack)
-    print_loop:
-        pop dx
-        mov eax, 4           ; syscall: write
-        mov ebx, 1           ; file descriptor: stdout
-        mov ecx, esp         ; pointer to digit
-        mov edx, 1           ; length of one byte
-        int 0x80
-        loop print_loop      ; repeat for all digits
-
-    pop eax                  ; restore eax
+; Conversion of eax to string (ASCII digits)
+convert:
+    dec edi                   ; Move buffer pointer backwards
+    xor edx, edx              ; Clear edx for division
+    mov ecx, 10               ; Base 10 for division
+    div ecx                   ; Divide eax by 10, result in eax, remainder in edx
+    add dl, '0'               ; Convert remainder to ASCII character
+    mov [edi], dl             ; Store ASCII character in buffer
+    test eax, eax             ; Check if eax is zero
+    jnz convert               ; If eax is not zero, continue converting
     ret
