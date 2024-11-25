@@ -77,3 +77,4 @@ exit_program:
     mov eax, 1             ; syscall: exit
     xor ebx, ebx           ; return code 0
     int 0x80
+;code will be used to identify positive and negative values
