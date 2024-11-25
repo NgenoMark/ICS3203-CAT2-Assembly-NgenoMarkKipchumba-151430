@@ -1,5 +1,5 @@
 section .bss
-    array resb 5                 ; Reserve 5 bytes for the array
+    array resb 5                 ; Reserve 5 bytes for the array to accept only 5 numbers
     buffer resb 15               ; Reserve buffer for reading input (includes spaces)
     out_buffer resb 10           ; Buffer for output (ASCII digits and spaces)
 
